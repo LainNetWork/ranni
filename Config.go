@@ -1,4 +1,4 @@
-package engine
+package ranni
 
 type Config struct {
 	MasterAccount int64  `yaml:"master_account"`
