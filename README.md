@@ -31,3 +31,36 @@ func main() {
 }
 
 ```
+
+#### 一个handler例子
+实现EventHandler接口即可
+```go
+package handler
+
+import (
+	"fmt"
+	engine "github.com/LainNetWork/ranni"
+	"strings"
+)
+
+const code = "repeat "
+
+type RepeatHandler struct {
+}
+// 功能帮助信息
+func (RepeatHandler) Help() string {
+	return "repeat 文字：朴实无华の复读机"
+}
+//处理消息
+func (RepeatHandler) Do(ctx *engine.EventContext) {
+	_, err := ctx.Send(engine.InitMsgChain(engine.TextMessage{Text: strings.TrimPrefix(ctx.MessageChain.String(), code)}))
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+}
+// 判断该消息是否能被本handler处理
+func (RepeatHandler) Filter(ctx *engine.EventContext) bool {
+	return strings.HasPrefix(ctx.MessageChain.String(), code)
+}
+
+```
