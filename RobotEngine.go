@@ -51,7 +51,7 @@ func cqConnect() {
 	values := url.Values{}
 	values.Add("access_token", robotConfig.AccessToken)
 	u.RawQuery = values.Encode()
-	log.Printf("connecting to %s", u.String())
+	log.Printf("connecting to %s", robotConfig.WsAddr)
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 	client, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
