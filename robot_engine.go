@@ -3,6 +3,7 @@ package ranni
 import (
 	"errors"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/robfig/cron/v3"
@@ -43,7 +44,20 @@ func (robotEngine *robotEngine) Start(config *Config) {
 	//启动定时器
 	robotEngine.cronClient.Start()
 	//连接cq-http
-	cqConnect()
+	go cqConnect()
+	//启动web服务
+	if robotConfig.ApiAddr != "" {
+		go startApiServer()
+	}
+}
+
+func startApiServer() {
+	e := gin.Default()
+	e.POST("/send", ApiSendMessage)
+	err := e.Run(robotConfig.ApiAddr)
+	if err != nil {
+		log.Println("api服务启动失败！", err)
+	}
 }
 
 func cqConnect() {
@@ -56,7 +70,7 @@ func cqConnect() {
 	signal.Notify(interrupt, os.Interrupt)
 	client, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
-		fmt.Println(err.Error())
+		panic(err.Error())
 		return
 	}
 	defer func(client *websocket.Conn) {
