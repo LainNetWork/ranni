@@ -4,7 +4,7 @@ import "github.com/gin-gonic/gin"
 
 // ApiMessageVO 只支持Text、Image、At三种格式
 type ApiMessageVO struct {
-	Type string `json:"type"`
+	Type string `json:"type" binding:"required"`
 	Url  string `json:"url"`
 	Qq   int64  `json:"qq"`
 	Text string `json:"text"`
