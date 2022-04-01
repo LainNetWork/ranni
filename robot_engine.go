@@ -43,12 +43,12 @@ func (robotEngine *robotEngine) Start(config *Config) {
 	robotConfig = config
 	//启动定时器
 	robotEngine.cronClient.Start()
-	//连接cq-http
-	go cqConnect()
 	//启动web服务
 	if robotConfig.ApiAddr != "" {
 		go startApiServer()
 	}
+	//连接cq-http
+	cqConnect()
 }
 
 func startApiServer() {
