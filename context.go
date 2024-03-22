@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-//api列表
+// api列表
 const (
 	SendMessage         = "/send_msg"               //发送消息
 	DeleteMessage       = "/delete_msg"             //撤回消息
@@ -171,13 +171,14 @@ type BotInfoMO struct {
 }
 
 func GetBotInfo() *BotInfo {
-	mo := &BotInfoMO{}
-	err := PostJson(robotConfig.CallBackAddr+GetLoginInfo, nil, mo)
+	values := url.Values{}
+	resp := &BotInfoMO{}
+	err := GetWithParams(robotConfig.CallBackAddr+GetGroupMemberList, values, resp)
 	if err != nil {
 		log.Println("获取bot信息异常", err.Error())
 		return nil
 	}
-	return &mo.Data
+	return &resp.Data
 }
 
 func SendToGroup(id int64, message *MessageChain) (*MessageCallBack, error) {
