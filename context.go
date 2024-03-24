@@ -173,7 +173,7 @@ type BotInfoMO struct {
 func GetBotInfo() *BotInfo {
 	values := url.Values{}
 	resp := &BotInfoMO{}
-	err := GetWithParams(robotConfig.CallBackAddr+GetGroupMemberList, values, resp)
+	err := GetWithParams(robotConfig.CallBackAddr+GetLoginInfo, values, resp)
 	if err != nil {
 		log.Println("获取bot信息异常", err.Error())
 		return nil
