@@ -17,6 +17,7 @@ const (
 	GetGroupMemberList  = "/get_group_member_list"  //获取群组人员列表
 	SendGroupForwardMsg = "/send_group_forward_msg" //发送自定义合并转发消息
 	GetLoginInfo        = "/get_login_info"
+	GetGroupMessageList = "/get_group_msg_history"
 )
 
 type EventContext struct {
@@ -168,6 +169,29 @@ type BotInfoMO struct {
 	Data    BotInfo `json:"data"`
 	RetCode int     `json:"retcode"`
 	Status  string  `json:"status"`
+}
+
+func GetGroupMsg(groupId int64) []GroupMessageEvent {
+	values := url.Values{}
+	values.Set("group_id", strconv.FormatInt(groupId, 10))
+	values.Set("message_seq", "")
+	err, body := GetBodyWithParams(robotConfig.CallBackAddr+GetGroupMessageList, values)
+	if err != nil {
+		log.Println("获取bot信息异常", err.Error())
+		return nil
+	}
+	var arr []json.Any
+	json.Get(body, "data", "messages").ToVal(&arr)
+	result := []GroupMessageEvent{}
+	for _, item := range arr {
+		decode, err := messageEventDecode([]byte(item.ToString()))
+		if err != nil {
+			return nil
+		}
+		groupMsgEvent := decode.(GroupMessageEvent)
+		result = append(result, groupMsgEvent)
+	}
+	return result
 }
 
 func GetBotInfo() *BotInfo {

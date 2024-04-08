@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"github.com/gin-gonic/gin"
 	json "github.com/json-iterator/go"
-	"io/ioutil"
+	"io"
 	"net/http"
 	urls "net/url"
 	"time"
@@ -24,7 +24,7 @@ func PostJson(url string, body interface{}, respStruct interface{}) error {
 		if respStruct == nil {
 			return nil
 		}
-		all, err2 := ioutil.ReadAll(resp.Body)
+		all, err2 := io.ReadAll(resp.Body)
 		if err2 != nil {
 			return err2
 		}
@@ -52,7 +52,7 @@ func GetWithParams(url string, params urls.Values, respStruct interface{}, path 
 		if respStruct == nil {
 			return nil
 		}
-		all, err2 := ioutil.ReadAll(resp.Body)
+		all, err2 := io.ReadAll(resp.Body)
 		if err2 != nil {
 			return err2
 		}
@@ -60,6 +60,28 @@ func GetWithParams(url string, params urls.Values, respStruct interface{}, path 
 		return nil
 	} else {
 		return err
+	}
+
+}
+
+func GetBodyWithParams(url string, params urls.Values) (error, []byte) {
+	parse, err := urls.Parse(url)
+	if err != nil {
+		return err, nil
+	}
+	params.Add("access_token", robotConfig.AccessToken)
+	parse.RawQuery = params.Encode()
+	urlWithParams := parse.String()
+	resp, err := client.Get(urlWithParams)
+	if err == nil && resp.StatusCode == 200 {
+		defer resp.Body.Close()
+		all, err2 := io.ReadAll(resp.Body)
+		if err2 != nil {
+			return err2, nil
+		}
+		return nil, all
+	} else {
+		return err, nil
 	}
 
 }
