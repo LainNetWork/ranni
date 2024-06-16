@@ -237,6 +237,10 @@ func JsonToMessageChain(messages jsoniter.Any) MessageChain {
 			message := &FaceMessage{}
 			data.ToVal(message)
 			msgS = append(msgS, *message)
+		case Record.String():
+			message := &RecordMessage{}
+			data.ToVal(message)
+			msgS = append(msgS, *message)
 		default:
 			fmt.Println("无匹配类型", msgItem.ToString())
 			continue

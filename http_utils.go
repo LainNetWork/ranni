@@ -65,6 +65,9 @@ func GetWithParams(url string, params urls.Values, respStruct interface{}, path 
 }
 
 func GetBodyWithParams(url string, params urls.Values) (error, []byte) {
+	if params == nil {
+		params = urls.Values{}
+	}
 	parse, err := urls.Parse(url)
 	if err != nil {
 		return err, nil

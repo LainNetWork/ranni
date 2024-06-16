@@ -1,10 +1,12 @@
 package ranni
 
 import (
+	"encoding/base64"
 	"fmt"
 	json "github.com/json-iterator/go"
 	"log"
 	"net/url"
+	"os"
 	"strconv"
 	"time"
 )
@@ -16,8 +18,9 @@ const (
 	GetMessage          = "/get_msg"                //获取消息
 	GetGroupMemberList  = "/get_group_member_list"  //获取群组人员列表
 	SendGroupForwardMsg = "/send_group_forward_msg" //发送自定义合并转发消息
-	GetLoginInfo        = "/get_login_info"
-	GetGroupMessageList = "/get_group_msg_history"
+	GetLoginInfo        = "/get_login_info"         //获取登录账号信息
+	GetGroupMessageList = "/get_group_msg_history"  // 获取群历史消息
+	GetRecord           = "/get_record"             //获取语音
 )
 
 type EventContext struct {
@@ -106,7 +109,8 @@ func send(eventType EventType, id int64, message *MessageChain) (*MessageCallBac
 func buildMessageMO(message *MessageChain) *[]MessageMO {
 	var msgData []MessageMO
 	for _, item := range message.GetMessages() {
-		msgData = append(msgData, item.buildMessageMO())
+		mo := item.buildMessageMO()
+		msgData = append(msgData, mo)
 	}
 	return &msgData
 }
@@ -182,7 +186,7 @@ func GetGroupMsg(groupId int64) []GroupMessageEvent {
 	}
 	var arr []json.Any
 	json.Get(body, "data", "messages").ToVal(&arr)
-	result := []GroupMessageEvent{}
+	var result []GroupMessageEvent
 	for _, item := range arr {
 		decode, err := messageEventDecode([]byte(item.ToString()))
 		if err != nil {
@@ -203,6 +207,30 @@ func GetBotInfo() *BotInfo {
 		return nil
 	}
 	return &resp.Data
+}
+
+func GetRecordFile(fileName string) (error, []byte) {
+	params := url.Values{}
+	params.Add("file", fileName)
+	params.Add("out_format", "wav")
+	err, bytes := GetBodyWithParams(robotConfig.CallBackAddr+GetRecord, params)
+	if err != nil {
+		log.Println("获取bot信息异常", err.Error())
+		return err, nil
+	}
+	encoded := json.Get(bytes, "data", "base64").ToString()
+	decodeWav, err := base64.StdEncoding.DecodeString(encoded)
+	if err != nil {
+		log.Println("解码音频文件异常！", err.Error())
+		return err, nil
+	}
+	err = os.WriteFile("C:\\Users\\tians\\1.wav", decodeWav, os.ModePerm)
+	if err != nil {
+		return err, nil
+	}
+
+	return nil, nil
+
 }
 
 func SendToGroup(id int64, message *MessageChain) (*MessageCallBack, error) {
